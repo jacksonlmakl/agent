@@ -1,6 +1,5 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-import argparse
 
 
 def lightweight(prompt,model_name="facebook/opt-125m"):
