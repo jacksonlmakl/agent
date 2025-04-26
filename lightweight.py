@@ -28,14 +28,14 @@ def lightweight(prompt,model_name="facebook/opt-125m"):
     with torch.no_grad():
         output = model.generate(
             inputs.input_ids,
-            max_length=inputs.input_ids.shape[1] + 100,
-            temperature=0.7,
+            # max_length=inputs.input_ids.shape[1] + 100,
+            temperature=0.6,
             do_sample=True,
             pad_token_id=tokenizer.eos_token_id
         )
 
     # Extract new text
-    full_response = tokenizer.decode(output[0], skip_special_tokens=True)
+    full_response = tokenizer.decode(output[0])
     model_response = full_response[len(prompt):].strip()
 
     print(f"Response: {model_response}")
