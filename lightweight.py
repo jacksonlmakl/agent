@@ -7,7 +7,7 @@ import gc
 # Create a model cache to avoid reloading the model
 model_cache = {}
 
-def lightweight(prompt, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0", max_new_tokens=150, temperature=0.4):
+def lightweight(prompt, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0", max_new_tokens=150, temperature=0.4, context=[]):
     """
     Generate responses using a lightweight LLM optimized for resource-constrained environments.
     
@@ -56,7 +56,7 @@ def lightweight(prompt, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0", max_new
         messages = [
             {"role": "system", "content": "You are a helpful, precise, and accurate assistant."},
             {"role": "user", "content": prompt}
-        ]
+        ] + context
         
         # Create prompt using model's chat template
         if hasattr(tokenizer, "apply_chat_template"):
