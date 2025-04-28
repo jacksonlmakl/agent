@@ -49,5 +49,54 @@ class Agent:
           }
           self.messages.append(entry)
           return entry['items'][-1]['content']
-          
+     
+
+
+from agent import Agent
+
+def autoChat(starter,instructions=None,iters=5,tokens=100,web=False,rag=False):
+    a=Agent()
+    a1=Agent()
+    if instructions:
+        base=instructions
+    else:
+        base="""
+        Instructions:
+        - You are having a conversation and are a good conversationalist. You ask questions and are engaged with the topic. You may change the topic or explore your partners ideas. The conversation path is your choice.
+        - Answer completely, and clearly.
+        - Answer in plain text format
+        """
+    prompt_a=f""" 
+    {base} 
+    Conversation Prompt:
+    {starter}
+    """
+    chat_history=[]
+    count=0
+    _rag=False
+    _web=False
+    while True:
+        if rag == True:
+            if count%2==0 or count==0:
+                _rag=True
+            else:
+                _rag=False
+        if web == True:
+            if count%2==0 or count==0:
+                _web=True
+            else:
+                _web=False
+        prompt_a1=a.chat(base+prompt_a,web=_web,rag=_rag,tokens=tokens,messages=a1.messages)
+        prompt_a=a1.chat(base+prompt_a1,web=_web,rag=_rag,tokens=tokens,messages=a.messages)
+        print("\nAgent A1: ",prompt_a1)
+        print("\nAgent A: ",prompt_a)
+        chat_history.append({
+            "agent_a1":prompt_a1,
+            "agent_a":prompt_a
+        })
+        print('\n\n')
+        count+=1
+        if count ==iters:
+            break
+    return chat_history
 

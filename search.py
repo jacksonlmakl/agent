@@ -642,7 +642,7 @@ def analyze_and_summarize(prompt, fetch_full_content=True):
     }
 
 def search(prompt):
-    information=get_information(prompt)
+    information=get_information(prompt.split('Conversation Prompt:')[-1])
     summary=gpt(f"You are a helpful text summarizer. Please as briefly as possible, without losing any information, summarize this text: {information}")
     
     second_prompt=gpt(f"Take the central theme of this information and turn it into a key word optimized google search to help find information related to what the the central theme. You may only return the new query in your response, nothing else. : \n {summary}")
@@ -652,13 +652,13 @@ def search(prompt):
     return second_take
 
 def chat(prompt):
-    info=search(prompt)
+    info=search(prompt.split('Conversation Prompt:')[-1])
     formatted_prompt = f"""
     You are a helpful AI assistant. Based on the following contextual information, 
     please provide a clear, accurate, and concise response to the user's question.
     
     USER QUESTION:
-    {prompt}
+    {prompt.split('Conversation Prompt:')[-1]}
     
     CONTEXTUAL INFORMATION:
     ''{info}''
