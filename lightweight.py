@@ -94,7 +94,7 @@ Answer:"""
             "do_sample": True,
             "top_p": 0.95,
             "top_k": 50,
-            "repetition_penalty": 1.3,
+            "repetition_penalty": 1.4,
             "no_repeat_ngram_size": 3,
             "pad_token_id": tokenizer.pad_token_id,
             "eos_token_id": tokenizer.eos_token_id,
