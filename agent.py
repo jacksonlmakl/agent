@@ -33,7 +33,6 @@ class Agent:
                if messages !=[]:
                     _prompt = f"{_prompt} \n\n--------Chat History: \n{str(messages)}"
                c=gpt(_prompt)
-               print(c)
           else:
                c=chat(_prompt,max_new_tokens=tokens,context=messages)
         

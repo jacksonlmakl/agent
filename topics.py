@@ -26,6 +26,5 @@ def topics(text,model_name=None):
     output=[]
     for i in range(len(predictions)):
         if predictions[i]:
-            print(class_mapping[i])
             output.append(class_mapping[i])
     return output

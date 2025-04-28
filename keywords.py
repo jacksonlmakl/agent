@@ -11,5 +11,4 @@ def keywords(text,model_name = "agentlans/flan-t5-small-keywords"):
 
     # Process the output to get a list of keywords (split and remove duplicates)
     keywords = list(set(decoded_output.split('||')))
-    print(keywords)
     return keywords
