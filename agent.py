@@ -33,6 +33,8 @@ class Agent:
           user_entry={
                "timestamp": str(datetime.datetime.now()),
                "topics": t,
+               "web": web,
+               "rag": rag,
                "role":"user",
                "content": prompt
           }
@@ -41,6 +43,8 @@ class Agent:
           assistant_entry={
                "timestamp": str(datetime.datetime.now()),
                "topics": t,
+               "web": web,
+               "rag": rag,
                "role":"assistant",
                "content": c
           }
