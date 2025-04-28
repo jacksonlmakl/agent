@@ -10,7 +10,7 @@ class Agent:
      def __init__(self):
           self.messages=[]
 
-     def chat(self,prompt,web=None,rag=None,tokens=200):
+     def chat(self,prompt,web=False,rag=False,gpt=False,tokens=200):
           context=[]
           if rag:
                r=RAG(prompt)
@@ -19,7 +19,7 @@ class Agent:
                s=search(prompt)
                context.append(s)    
                      
-          c=chat(f"""
+          _prompt=f"""
                User Question/Prompt:
                     - ''{prompt}''
                Instructions:
@@ -27,7 +27,12 @@ class Agent:
                     - Be concise, accurate, and coherent in your answers
                {'Contextual Information:' if rag ==True or web==True else ''}
                {'\n'.join(context)}
-               """,max_new_tokens=tokens)
+               """
+          if gpt:
+               c=gpt(_prompt)
+          else:
+               c=chat(_prompt,max_new_tokens=tokens)
+               
           t=topics(c)
 
           user_entry={
