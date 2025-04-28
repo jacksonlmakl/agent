@@ -7,7 +7,7 @@ import gc
 # Create a model cache to avoid reloading the model
 model_cache = {}
 
-def lightweight(prompt, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0", max_new_tokens=150, temperature=0.4, context=[]):
+def lightweight(prompt, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0", max_new_tokens=200, temperature=0.1, context=[]):
     """
     Generate responses using a lightweight LLM optimized for resource-constrained environments.
     
@@ -91,10 +91,10 @@ Answer:"""
         generate_kwargs = {
             "max_new_tokens": max_new_tokens,
             "temperature": temperature,
-            "do_sample": temperature > 0,
-            "top_p": 0.92,
+            "do_sample": True,
+            "top_p": 0.95,
             "top_k": 50,
-            "repetition_penalty": 1.2,
+            "repetition_penalty": 1.3,
             "no_repeat_ngram_size": 3,
             "pad_token_id": tokenizer.pad_token_id,
             "eos_token_id": tokenizer.eos_token_id,
@@ -113,7 +113,7 @@ Answer:"""
     # If response is empty, try decoding the entire output
     if not response:
         full_output = tokenizer.decode(output[0], skip_special_tokens=True)
-        
+        print(full_output)
         # Try various methods to extract the response
         if "<|assistant|>" in full_output:
             response = full_output.split("<|assistant|>")[-1].strip()

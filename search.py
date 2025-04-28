@@ -9,7 +9,7 @@ import html
 import json
 from urllib.parse import urlparse
 from gpt import gpt
-
+from lightweight import lightweight
 class WebResearcher:
     def __init__(self, max_results_per_source=5, timeout=15):
         """
@@ -645,3 +645,24 @@ def search(prompt):
     information=get_information(prompt)
     summary=gpt(f"You are a helpful text summarizer. Please as briefly as possible, without losing any information, summarize this text: {information}")
     return summary
+
+def chat(prompt):
+    info=search(prompt)
+    formatted_prompt = f"""
+    You are a helpful AI assistant. Based on the following contextual information, 
+    please provide a clear, accurate, and concise response to the user's question.
+    
+    USER QUESTION:
+    {prompt}
+    
+    CONTEXTUAL INFORMATION:
+    ''{info}''
+    
+    Instructions:
+    1. Use only the information provided above to answer the question
+    2. If the information is insufficient, acknowledge the limitations
+    3. Format your response in a readable manner in text paragraph format
+    5. Keep your response focused and relevant to the question
+    """
+    
+    return lightweight(formatted_prompt, model_name="meta-llama/Llama-3.2-3B-Instruct")

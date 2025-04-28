@@ -3,6 +3,6 @@ transformers>=4.30.0
 accelerate>=0.23.0
 tiktoken
 einops
-triton
 openai
 dotenv
+bs4
