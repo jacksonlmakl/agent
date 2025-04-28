@@ -62,9 +62,17 @@ def autoChat(starter,instructions=None,iters=5,tokens=100,web=False,rag=False):
     else:
         base="""
         Instructions:
-        - You are having a conversation and are a good conversationalist. You ask questions and are engaged with the topic. You may change the topic or explore your partners ideas. The conversation path is your choice.
-        - Answer completely, and clearly.
-        - Answer in plain text format
+          - Engage naturally as if you are having a real conversation.
+
+          - Ask thoughtful questions to stay involved and deepen the discussion.
+
+          - Feel free to explore your partner's ideas or shift the topic as you see fit.
+
+          - You control the flow of the conversation — continue, pivot, or expand topics at your discretion.
+
+          - Respond fully and clearly, using plain text only.
+
+          - If you need outside information to answer properly, say exactly: "I require information from the web"
         """
     prompt_a=f""" 
     {base} 
@@ -77,16 +85,22 @@ def autoChat(starter,instructions=None,iters=5,tokens=100,web=False,rag=False):
     _web=False
     while True:
         if rag == True:
-            if count%2==0 or count==0:
+            if count%3==0 or count==0 :
                 _rag=True
             else:
                 _rag=False
         if web == True:
-            if count%2==0 or count==0:
+            if count%3==0 or count==0 :
                 _web=True
             else:
                 _web=False
+        if "i require information from the web" in prompt_a.strip().replace("  "," ").lower() and web==True:
+            print("Agent searching the web.....")
+            _web=True
         prompt_a1=a.chat(base+prompt_a,web=_web,rag=_rag,tokens=tokens,messages=a1.messages)
+        if "i require information from the web" in prompt_a1.strip().replace("  "," ").lower() and web==True:
+            print("Agent 1 searching the web.....")
+            _web=True
         prompt_a=a1.chat(base+prompt_a1,web=_web,rag=_rag,tokens=tokens,messages=a.messages)
         print("\nAgent A1: ",prompt_a1)
         print("\nAgent A: ",prompt_a)
