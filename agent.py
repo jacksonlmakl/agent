@@ -63,6 +63,8 @@ def autoChat(starter,instructions=None,iters=5,tokens=100,web=False,rag=False):
         base="""
         Instructions:
           - Engage naturally as if you are having a real conversation.
+          
+          - If you need outside information to answer properly, say exactly: "I require information from the web"
 
           - Ask thoughtful questions to stay involved and deepen the discussion.
 
@@ -70,9 +72,7 @@ def autoChat(starter,instructions=None,iters=5,tokens=100,web=False,rag=False):
 
           - You control the flow of the conversation — continue, pivot, or expand topics at your discretion.
 
-          - Respond fully and clearly, using plain text only.
-
-          - If you need outside information to answer properly, say exactly: "I require information from the web"
+          - Respond fully and clearly, using plain text only.          
         """
     prompt_a=f""" 
     {base} 
