@@ -53,10 +53,10 @@ def lightweight(prompt, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0", max_new
     # Format prompt according to specific model templates
     if "TinyLlama" in model_name and "Chat" in model_name:
         # Use messages format for TinyLlama-Chat
-        messages = [
+        messages = context+[
             {"role": "system", "content": "You are a helpful, precise, and accurate assistant."},
             {"role": "user", "content": prompt}
-        ] + context
+        ] 
         
         # Create prompt using model's chat template
         if hasattr(tokenizer, "apply_chat_template"):
