@@ -4,4 +4,4 @@ __pycache__
 vector_store
 file_registry.json
 .DS_Store
-chats/*
+chats/*.txt
