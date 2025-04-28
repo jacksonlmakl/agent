@@ -11,7 +11,7 @@ class Agent:
      def __init__(self):
           self.messages=[]
 
-     def chat(self,prompt,web=False,rag=False,use_gpt=False,tokens=200,context=[]):
+     def chat(self,prompt,web=False,rag=False,use_gpt=False,tokens=200,messages=[]):
           context=[]
           if rag:
                r=RAG(prompt)
@@ -30,12 +30,13 @@ class Agent:
                {'\n'.join(context)}
                """
           if use_gpt:
-               if context !=[]:
-                    _prompt = f"{prompt} \n\n--------Chat History: \n{context}"
+               if messages !=[]:
+                    _prompt = f"{_prompt} \n\n--------Chat History: \n{str(messages)}"
                c=gpt(_prompt)
+               print(c)
           else:
-               c=chat(_prompt,max_new_tokens=tokens,context=context)
-               
+               c=chat(_prompt,max_new_tokens=tokens,context=messages)
+        
           t=topics(c)
 
           user_entry={
