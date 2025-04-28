@@ -2,16 +2,32 @@ from agent import Agent, autoChat
 from questions import question
 import threading
 import time
+import uuid  # For generating unique IDs
 
 class Model:
     def __init__(self):        
         self.agent = Agent()
         self.conscious = []
         self.subconscious = []
-        self.threads = []
+        self.active_threads = {}  # Dictionary to track active threads with IDs
         self.lock = threading.Lock()  # Add a lock for thread safety
+        self.thread_cleanup_interval = 60  # Seconds between thread cleanup
 
-    def chat(self, prompt, web=False, rag=False, tokens=150, use_gpt=False,use_sub_gpt=True, iters=5):
+        # Start thread monitoring
+        self.monitor_thread = threading.Thread(target=self._monitor_threads, daemon=True)
+        self.monitor_thread.start()
+
+    def _monitor_threads(self):
+        """Background thread that periodically cleans up completed threads"""
+        while True:
+            time.sleep(self.thread_cleanup_interval)
+            with self.lock:
+                # Remove references to completed threads
+                completed_threads = [tid for tid, t in self.active_threads.items() if not t.is_alive()]
+                for tid in completed_threads:
+                    del self.active_threads[tid]
+
+    def chat(self, prompt, web=False, rag=False, tokens=150, use_gpt=False, use_sub_gpt=True, iters=5):
         response = self.agent.chat(prompt=prompt,
                                   web=web,
                                   rag=rag,
@@ -25,27 +41,57 @@ class Model:
         max_threads = 3
         semaphore = threading.Semaphore(max_threads)
 
-        # Clear previous threads
-        self.threads = []
-
         # Define the worker function correctly
-        def thread_worker(q, semaphore):
-            with semaphore:  # Acquire the semaphore
-                result = autoChat(q, None, iters, 75, True, False, use_sub_gpt)
-                # Safely add to subconscious using lock
-                with self.lock:
-                    self.subconscious.append(result)
+        def thread_worker(q, semaphore, thread_id):
+            try:
+                with semaphore:  # Acquire the semaphore
+                    result = autoChat(q, None, iters, 75, True, False, use_sub_gpt)
+                    # Safely add to subconscious using lock
+                    with self.lock:
+                        self.subconscious.append(result)
+            except Exception as e:
+                print(f"Thread {thread_id} error: {e}")
+            finally:
+                # Nothing to do here - thread monitoring will clean up references
+                pass
 
-        # Create threads with the properly defined worker
+        # Create and start threads with the properly defined worker
+        new_threads = []
         for q in generated_questions:
+            _q = f"""
+            Question:
+            {q}
+
+            Based On:
+            {prompt}
+            """
+            # Generate a unique ID for this thread
+            thread_id = str(uuid.uuid4())
+            
             thread = threading.Thread(
                 target=thread_worker,
-                args=(q, semaphore)
+                args=(_q, semaphore, thread_id)
             )
-            self.threads.append(thread)
+            
+            # Track this thread in our dictionary
+            with self.lock:
+                self.active_threads[thread_id] = thread
+                
             thread.start()  # Start the thread immediately
+            new_threads.append(thread)  # Keep a local reference for this batch
 
         self.conscious.append({"role": "user", "content": prompt})
-        self.conscious.append({"role": "assistant", "content": response})  # Changed "user" to "assistant"
+        self.conscious.append({"role": "assistant", "content": response})
         
         return response
+        
+    def wait_for_all_threads(self, timeout=None):
+        """Wait for all background threads to complete, with optional timeout"""
+        with self.lock:
+            # Make a copy of active threads to avoid modification during iteration
+            threads_to_wait = list(self.active_threads.values())
+        
+        for thread in threads_to_wait:
+            thread.join(timeout)
+        
+        return all(not t.is_alive() for t in threads_to_wait)

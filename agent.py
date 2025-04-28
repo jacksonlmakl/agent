@@ -1,10 +1,10 @@
 from lightweight import chat
 from search import chat as search
-from topics import topics
+# from topics import topics
 from rag import RAG
 import datetime
 from gpt import gpt
-from keywords import keywords
+# from keywords import keywords
 
 
 class Agent:
@@ -37,13 +37,13 @@ class Agent:
           else:
                c=chat(_prompt,max_new_tokens=tokens,context=messages)
         
-          t=topics(c)
-          k=keywords(c)
+          # t=topics(c)
+          # k=keywords(c)
 
           entry={
                "meta":{"timestamp": str(datetime.datetime.now()),
-               "topics": t,
-               "key_words":k,
+               # "topics": t,
+               # "key_words":k,
                "web": web,
                "rag": rag},
                "items":[{"role":"user","content":prompt},{"role":"assistant","content":c}]

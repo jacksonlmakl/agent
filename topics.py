@@ -8,7 +8,7 @@ def topics(text, model_name=None):
     MODEL = "cardiffnlp/tweet-topic-latest-multi"
     if model_name:
         MODEL = model_name
-        
+    
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
