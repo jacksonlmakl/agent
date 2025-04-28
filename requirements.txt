@@ -6,3 +6,5 @@ einops
 openai
 dotenv
 bs4
+numpy
+scipy
