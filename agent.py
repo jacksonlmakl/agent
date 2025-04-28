@@ -17,7 +17,7 @@ class Agent:
                r=RAG(prompt)
                context.append(r)
           if web:
-               s=search(prompt)
+               s=search(prompt,use_gpt=use_gpt)
                context.append(s)    
                      
           _prompt=f"""
@@ -33,6 +33,7 @@ class Agent:
                if messages !=[]:
                     _prompt = f"{_prompt} \n\n--------Chat History: \n{str(messages)}"
                c=gpt(_prompt)
+               print("USING CHAT GPT 4")
           else:
                c=chat(_prompt,max_new_tokens=tokens,context=messages)
         
@@ -54,7 +55,7 @@ class Agent:
 
 from agent import Agent
 
-def autoChat(starter,instructions=None,iters=5,tokens=100,web=False,rag=False):
+def autoChat(starter,instructions=None,iters=5,tokens=100,web=False,rag=False,use_gpt=False):
     a=Agent()
     a1=Agent()
     if instructions:
@@ -97,11 +98,11 @@ def autoChat(starter,instructions=None,iters=5,tokens=100,web=False,rag=False):
         if "i require information from the web" in prompt_a.strip().replace("  "," ").lower() and web==True:
             print("Agent searching the web.....")
             _web=True
-        prompt_a1=a.chat(base+prompt_a,web=_web,rag=_rag,tokens=tokens,messages=a1.messages)
+        prompt_a1=a.chat(base+prompt_a,web=_web,rag=_rag,tokens=tokens,messages=a1.messages,use_gpt=use_gpt)
         if "i require information from the web" in prompt_a1.strip().replace("  "," ").lower() and web==True:
             print("Agent 1 searching the web.....")
             _web=True
-        prompt_a=a1.chat(base+prompt_a1,web=_web,rag=_rag,tokens=tokens,messages=a.messages)
+        prompt_a=a1.chat(base+prompt_a1,web=_web,rag=_rag,tokens=tokens,messages=a.messages,use_gpt=use_gpt)
         print("\nAgent A1: ",prompt_a1)
         print("\nAgent A: ",prompt_a)
         chat_history.append({

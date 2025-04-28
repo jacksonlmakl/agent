@@ -651,7 +651,7 @@ def search(prompt):
     second_take=gpt(f"You are a helpful text summarizer. Please as briefly as possible, without losing any information, summarize this text:  {new_information} {summary}")
     return second_take
 
-def chat(prompt):
+def chat(prompt,use_gpt=False):
     info=search(prompt.split('Conversation Prompt:')[-1])
     formatted_prompt = f"""
     You are a helpful AI assistant. Based on the following contextual information, 
@@ -669,5 +669,7 @@ def chat(prompt):
     3. Format your response in a readable manner in text paragraph format
     5. Keep your response focused and relevant to the question
     """
-    
-    return lw_chat(formatted_prompt, model_name="meta-llama/Llama-3.2-3B-Instruct")
+    if use_gpt:
+        return gpt(formatted_prompt)
+    else:
+        return lw_chat(formatted_prompt, model_name="meta-llama/Llama-3.2-3B-Instruct")
