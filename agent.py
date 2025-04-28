@@ -106,8 +106,8 @@ def autoChat(starter,instructions=None,iters=5,tokens=100,web=False,rag=False,us
         print("\nAgent A1: ",prompt_a1)
         print("\nAgent A: ",prompt_a)
         chat_history.append({
-            "agent_a1":prompt_a1,
-            "agent_a":prompt_a
+            "user":prompt_a1,
+            "assistant":prompt_a
         })
         print('\n\n')
         count+=1
