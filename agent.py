@@ -3,6 +3,7 @@ from search import chat as search
 from topics import topics
 from rag import RAG
 import datetime
+from gpt import gpt
 
 
 
@@ -10,7 +11,7 @@ class Agent:
      def __init__(self):
           self.messages=[]
 
-     def chat(self,prompt,web=False,rag=False,gpt=False,tokens=200):
+     def chat(self,prompt,web=False,rag=False,use_gpt=False,tokens=200):
           context=[]
           if rag:
                r=RAG(prompt)
@@ -28,7 +29,7 @@ class Agent:
                {'Contextual Information:' if rag ==True or web==True else ''}
                {'\n'.join(context)}
                """
-          if gpt:
+          if use_gpt:
                c=gpt(_prompt)
           else:
                c=chat(_prompt,max_new_tokens=tokens)
