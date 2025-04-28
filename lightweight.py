@@ -7,7 +7,7 @@ import gc
 # Create a model cache to avoid reloading the model
 model_cache = {}
 
-def lightweight(prompt, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0", max_new_tokens=200, temperature=0.1, context=[]):
+def chat(prompt, model_name="meta-llama/Llama-3.2-3B-Instruct", max_new_tokens=200, temperature=0.1, context=[]):
     """
     Generate responses using a lightweight LLM optimized for resource-constrained environments.
     

@@ -9,7 +9,7 @@ import html
 import json
 from urllib.parse import urlparse
 from gpt import gpt
-from lightweight import lightweight
+from lightweight import chat as lw_chat
 class WebResearcher:
     def __init__(self, max_results_per_source=5, timeout=15):
         """
@@ -670,4 +670,4 @@ def chat(prompt):
     5. Keep your response focused and relevant to the question
     """
     
-    return lightweight(formatted_prompt, model_name="meta-llama/Llama-3.2-3B-Instruct")
+    return lw_chat(formatted_prompt, model_name="meta-llama/Llama-3.2-3B-Instruct")
