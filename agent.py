@@ -11,7 +11,7 @@ class Agent:
      def __init__(self):
           self.messages=[]
 
-     def chat(self,prompt,web=False,rag=False,use_gpt=False,tokens=200,messages=[]):
+     def chat(self,prompt,web=False,rag=False,use_gpt=False,tokens=200,messages=[],quen=False):
           context=[]
           if rag:
                r=RAG(prompt)
@@ -35,7 +35,11 @@ class Agent:
                c=gpt(_prompt)
                print("USING CHAT GPT 4")
           else:
-               c=chat(_prompt,max_new_tokens=tokens,context=messages)
+               if quen:
+                   c=chat(_prompt,max_new_tokens=tokens,context=messages,model_name="Qwen/Qwen3-0.6B")
+               else:
+                   c=chat(_prompt,max_new_tokens=tokens,context=messages)
+               
         
           # t=topics(c)
           # k=keywords(c)
@@ -98,11 +102,11 @@ def autoChat(starter,instructions=None,iters=5,tokens=100,web=False,rag=False,us
         if "i require information from the web" in prompt_a.strip().replace("  "," ").lower() and web==True:
             print("Agent searching the web.....")
             _web=True
-        prompt_a1=a.chat(base+prompt_a,web=_web,rag=_rag,tokens=tokens,messages=a1.messages,use_gpt=use_gpt)
+        prompt_a1=a.chat(base+prompt_a,web=_web,rag=_rag,tokens=tokens,messages=a1.messages,use_gpt=use_gpt,quen=True)
         if "i require information from the web" in prompt_a1.strip().replace("  "," ").lower() and web==True:
             print("Agent 1 searching the web.....")
             _web=True
-        prompt_a=a1.chat(base+prompt_a1,web=_web,rag=_rag,tokens=tokens,messages=a.messages,use_gpt=use_gpt)
+        prompt_a=a1.chat(base+prompt_a1,web=_web,rag=_rag,tokens=tokens,messages=a.messages,use_gpt=use_gpt,quen=True)
         print("\nAgent A1: ",prompt_a1)
         print("\nAgent A: ",prompt_a)
         chat_history.append({

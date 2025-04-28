@@ -672,4 +672,4 @@ def chat(prompt,use_gpt=False):
     if use_gpt:
         return gpt(formatted_prompt)
     else:
-        return lw_chat(formatted_prompt, model_name="meta-llama/Llama-3.2-3B-Instruct")
+        return lw_chat(formatted_prompt, model_name="Qwen/Qwen3-0.6B")
