@@ -102,7 +102,7 @@ class WebResearcher:
             return search_results
             
         except Exception as e:
-            print(f"DuckDuckGo search error: {e}")
+            # print(f"DuckDuckGo search error: {e}")
             return []
     
     def search_wikipedia(self, prompt):
@@ -174,7 +174,7 @@ class WebResearcher:
             return search_results
             
         except Exception as e:
-            print(f"Wikipedia search error: {e}")
+            # print(f"Wikipedia search error: {e}")
             return []
     
     def fetch_page_content(self, url, max_paragraphs=5):
@@ -293,7 +293,7 @@ class WebResearcher:
             return {"content": formatted_content.strip(), "metadata": metadata}
             
         except Exception as e:
-            print(f"Error fetching content from {url}: {e}")
+            # print(f"Error fetching content from {url}: {e}")
             return {"content": f"Error fetching content: {str(e)}", "metadata": {"error": str(e)}}
     
     def search_news(self, prompt):
@@ -374,7 +374,7 @@ class WebResearcher:
             return news_results
             
         except Exception as e:
-            print(f"News search error: {e}")
+            # print(f"News search error: {e}")
             return []
     
     def research(self, prompt, fetch_content=True, news=True):
@@ -389,7 +389,7 @@ class WebResearcher:
         Returns:
             dict: Combined search results with metadata
         """
-        print(f"Researching: {prompt}")
+        # print(f"Researching: {prompt}")
         start_time = time.time()
         
         # Use concurrent.futures to run searches in parallel
@@ -406,7 +406,7 @@ class WebResearcher:
             for future in concurrent.futures.as_completed(futures):
                 all_results.extend(future.result())
         
-        print(f"Found {len(all_results)} total results")
+        # print(f"Found {len(all_results)} total results")
         
         # Deduplicate results based on URL and title similarity
         deduplicated_results = []
@@ -433,11 +433,11 @@ class WebResearcher:
             
             deduplicated_results.append(result)
         
-        print(f"After deduplication: {len(deduplicated_results)} results")
+        # print(f"After deduplication: {len(deduplicated_results)} results")
         
         # Fetch additional content if requested
         if fetch_content:
-            print("Fetching additional content from URLs...")
+            # print("Fetching additional content from URLs...")
             
             # Use ThreadPoolExecutor to fetch content in parallel
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -459,7 +459,7 @@ class WebResearcher:
                         result['content'] = content_data["content"]
                         result['content_metadata'] = content_data["metadata"]
                     except Exception as e:
-                        print(f"Error fetching content: {e}")
+                        # print(f"Error fetching content: {e}")
                         result['content'] = f"Error fetching content: {str(e)}"
                         result['content_metadata'] = {"error": str(e)}
         

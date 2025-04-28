@@ -33,7 +33,7 @@ class Agent:
                if messages !=[]:
                     _prompt = f"{_prompt} \n\n--------Chat History: \n{str(messages)}"
                c=gpt(_prompt)
-               print("USING CHAT GPT 4")
+            #    print("USING CHAT GPT 4")
           else:
                if quen:
                    c=chat(_prompt,max_new_tokens=tokens,context=messages,model_name="Qwen/Qwen3-0.6B")
@@ -100,20 +100,20 @@ def autoChat(starter,instructions=None,iters=5,tokens=100,web=False,rag=False,us
             else:
                 _web=False
         if "i require information from the web" in prompt_a.strip().replace("  "," ").lower() and web==True:
-            print("Agent searching the web.....")
+            # print("Agent searching the web.....")
             _web=True
         prompt_a1=a.chat(base+prompt_a,web=_web,rag=_rag,tokens=tokens,messages=a1.messages,use_gpt=use_gpt,quen=True)
         if "i require information from the web" in prompt_a1.strip().replace("  "," ").lower() and web==True:
-            print("Agent 1 searching the web.....")
+            # print("Agent 1 searching the web.....")
             _web=True
         prompt_a=a1.chat(base+prompt_a1,web=_web,rag=_rag,tokens=tokens,messages=a.messages,use_gpt=use_gpt,quen=True)
-        print("\nAgent A1: ",prompt_a1)
-        print("\nAgent A: ",prompt_a)
+        # print("\nAgent A1: ",prompt_a1)
+        # print("\nAgent A: ",prompt_a)
         chat_history.append({
             "user":prompt_a1,
             "assistant":prompt_a
         })
-        print('\n\n')
+        # print('\n\n')
         count+=1
         if count ==iters:
             break

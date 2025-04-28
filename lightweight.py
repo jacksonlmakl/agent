@@ -116,7 +116,7 @@ Answer:"""
     # If response is empty, try decoding the entire output
     if not response:
         full_output = tokenizer.decode(output[0], skip_special_tokens=True)
-        print(full_output)
+        # print(full_output)
         # Try various methods to extract the response
         if "<|assistant|>" in full_output:
             response = full_output.split("<|assistant|>")[-1].strip()
