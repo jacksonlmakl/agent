@@ -3,3 +3,4 @@ __pycache__
 .env
 vector_store
 file_registry.json
+.DS_Store
