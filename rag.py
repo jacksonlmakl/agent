@@ -363,7 +363,7 @@ class RAGSystem:
         Based on the above information, here's a comprehensive answer to the original question/prompt:
         """
                 
-        return enriched_prompt
+        return context
 
         
 def RAG(prompt, directory_path="documents", vector_store_path="vector_store", file_registry_path="file_registry.json"):
