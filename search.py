@@ -644,7 +644,12 @@ def analyze_and_summarize(prompt, fetch_full_content=True):
 def search(prompt):
     information=get_information(prompt)
     summary=gpt(f"You are a helpful text summarizer. Please as briefly as possible, without losing any information, summarize this text: {information}")
-    return summary
+    
+    second_prompt=gpt(f"Take the central theme of this information and turn it into a key word optimized google search to help find information related to what the the central theme. You may only return the new query in your response, nothing else. : \n {summary}")
+    new_information=get_information(second_prompt)
+    
+    second_take=gpt(f"You are a helpful text summarizer. Please as briefly as possible, without losing any information, summarize this text:  {new_information} {summary}")
+    return second_take
 
 def chat(prompt):
     info=search(prompt)
@@ -660,7 +665,7 @@ def chat(prompt):
     
     Instructions:
     1. Use only the information provided above to answer the question
-    2. If the information is insufficient, acknowledge the limitations
+    2. If the information is insufficient, acknowledge the limitations BRIEFLY and move on
     3. Format your response in a readable manner in text paragraph format
     5. Keep your response focused and relevant to the question
     """
