@@ -40,27 +40,15 @@ class Agent:
           t=topics(c)
           k=keywords(c)
 
-          user_entry={
-               "timestamp": str(datetime.datetime.now()),
+          entry={
+               "meta":{"timestamp": str(datetime.datetime.now()),
                "topics": t,
                "key_words":k,
                "web": web,
-               "rag": rag,
-               "role":"user",
-               "content": prompt
+               "rag": rag},
+               "items":[{"role":"user","content":prompt},{"role":"assistant","content":c}]
           }
-          self.messages.append(user_entry)
-
-          assistant_entry={
-               "timestamp": str(datetime.datetime.now()),
-               "topics": t,
-               "key_words":k,
-               "web": web,
-               "rag": rag,
-               "role":"assistant",
-               "content": c
-          }
-          self.messages.append(assistant_entry)
-          return assistant_entry
+          self.messages.append(entry)
+          return entry['items'][-1]['content']
           
 
