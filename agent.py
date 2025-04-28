@@ -4,7 +4,7 @@ from topics import topics
 from rag import RAG
 import datetime
 from gpt import gpt
-
+from keywords import keywords
 
 
 class Agent:
@@ -38,10 +38,12 @@ class Agent:
                c=chat(_prompt,max_new_tokens=tokens,context=messages)
         
           t=topics(c)
+          k=keywords(c)
 
           user_entry={
                "timestamp": str(datetime.datetime.now()),
                "topics": t,
+               "key_words":k,
                "web": web,
                "rag": rag,
                "role":"user",
@@ -52,6 +54,7 @@ class Agent:
           assistant_entry={
                "timestamp": str(datetime.datetime.now()),
                "topics": t,
+               "key_words":k,
                "web": web,
                "rag": rag,
                "role":"assistant",

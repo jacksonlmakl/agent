@@ -3,8 +3,10 @@ from transformers import AutoTokenizer
 import numpy as np
 from scipy.special import expit
 
-def topics(text):
+def topics(text,model_name=None):
     MODEL = f"cardiffnlp/tweet-topic-latest-multi"
+    if model_name:
+        MODEL=model_name
     tokenizer = AutoTokenizer.from_pretrained(MODEL)
 
     # PT
