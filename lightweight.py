@@ -3,11 +3,14 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import gc
-
+from dotenv import load_dotenv
+from huggingface_hub import login as hf_login
 # Create a model cache to avoid reloading the model
 model_cache = {}
 
 def chat(prompt, model_name="meta-llama/Llama-3.2-3B-Instruct", max_new_tokens=200, temperature=0.1, context=[]):
+    load_dotenv()
+    hf_login(os.environ['HF_TOKEN'])
     """
     Generate responses using a lightweight LLM optimized for resource-constrained environments.
     
