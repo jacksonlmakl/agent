@@ -141,4 +141,4 @@ def chat(prompt, model_path="./qwen3-1.7b-finetuned-final", max_new_tokens=200, 
     # Clean up any garbage collection
     gc.collect()
     
-    return response
+    return response.replace("</think>","")

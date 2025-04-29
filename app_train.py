@@ -1,8 +1,13 @@
 from flask import Flask, request, jsonify, render_template_string
-from finetuned_model import chat
+from model import Model
 import uuid
 
 app = Flask(__name__)
+global MODEL
+MODEL=Model()
+def chat(prompt):
+    MODEL.chat("What Challenges Does Airbnb Face?",web=False,rag=True,tokens=450,use_gpt=True,use_sub_gpt=True,iters=3)
+    return MODEL.conscious[-1]['content']
 
 # Store conversation history
 conversations = {}
@@ -14,7 +19,7 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat</title>
+    <title>Chat Based Model Training</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -26,7 +31,7 @@ HTML_TEMPLATE = """
             background-color: #f0f2f5;
         }
         header {
-            background-color: #4a76a8;
+            background-color:  #f69e00;
             color: white;
             padding: 1rem;
             text-align: center;
@@ -85,7 +90,7 @@ HTML_TEMPLATE = """
         }
         button {
             padding: 0.8rem 1.5rem;
-            background-color: #4a76a8;
+            background-color: #f69e00;
             color: white;
             border: none;
             border-radius: 8px;
@@ -105,7 +110,7 @@ HTML_TEMPLATE = """
 </head>
 <body>
     <header>
-        <h1>Chat</h1>
+        <h1>Chat Based Model Training</h1>
     </header>
     <div class="container">
         <div class="chat-container" id="chat-container">
@@ -210,7 +215,7 @@ def handle_chat():
     
     # Get response from model
     context = conversations[session_id].copy()
-    response = chat(message, context=context)
+    response = chat(message)
     
     # Add assistant response to context
     conversations[session_id].append({"role": "assistant", "content": response})
@@ -218,4 +223,4 @@ def handle_chat():
     return jsonify({"response": response})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5001)
