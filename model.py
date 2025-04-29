@@ -53,13 +53,13 @@ class Model:
                 for tid in completed_threads:
                     del self.active_threads[tid]
 
-    def chat(self, prompt, web=False, rag=False, tokens=150, use_gpt=False, use_sub_gpt=True, iters=5):
+    def chat(self, prompt, web=False, rag=False, tokens=150, use_gpt=False, use_sub_gpt=True, iters=5,context=[]):
         response = self.agent.chat(prompt=prompt,
                                   web=web,
                                   rag=rag,
                                   tokens=tokens,
                                   use_gpt=use_gpt,
-                                  messages=self.conscious)
+                                  messages=self.conscious+context)
 
         generated_questions = question(response)
         

@@ -5,8 +5,8 @@ import uuid
 app = Flask(__name__)
 global MODEL
 MODEL=Model()
-def chat(prompt):
-    MODEL.chat("What Challenges Does Airbnb Face?",web=False,rag=True,tokens=450,use_gpt=True,use_sub_gpt=True,iters=3)
+def chat(prompt,context=[]):
+    MODEL.chat(prompt,web=False,rag=True,tokens=300,use_gpt=True,use_sub_gpt=True,iters=3,context=context)
     return MODEL.conscious[-1]['content']
 
 
@@ -486,7 +486,7 @@ def handle_chat():
     
     # Get response from model
     context = conversations[session_id].copy()
-    response = chat(message)
+    response = chat(message, context=context)
     
     # Add assistant response to context
     conversations[session_id].append({"role": "assistant", "content": response})
