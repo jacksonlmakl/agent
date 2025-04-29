@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template_string, redirect, url_for, flash
 import os
 import uuid
+import shutil
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -8,6 +9,7 @@ app.secret_key = "upload_secret_key"  # For flash messages
 
 # Configure upload folder
 UPLOAD_FOLDER = 'documents'
+VECTOR_STORE = 'vector_store'
 ALLOWED_EXTENSIONS = {'pdf'}
 
 # Create the upload directory if it doesn't exist
@@ -36,6 +38,8 @@ HTML_TEMPLATE = """
             --message-user-bg: #EBE9F7;
             --message-bot-bg: #FFFFFF;
             --shadow: 0 2px 6px rgba(0,0,0,0.05);
+            --danger-color: #E53E3E;
+            --danger-light: #FEE2E2;
         }
         
         * {
@@ -119,7 +123,7 @@ HTML_TEMPLATE = """
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             padding: 40px 20px;
         }
         
@@ -130,6 +134,17 @@ HTML_TEMPLATE = """
             width: 100%;
             max-width: 600px;
             padding: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .admin-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 600px;
+            padding: 24px;
             text-align: center;
         }
         
@@ -214,6 +229,31 @@ HTML_TEMPLATE = """
         .upload-btn:disabled {
             background-color: #a9a6c9;
             cursor: not-allowed;
+        }
+
+        .reset-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-block;
+            margin-top: 12px;
+        }
+
+        .reset-btn:hover {
+            background-color: #C53030;
+        }
+
+        .reset-description {
+            margin-top: 12px;
+            margin-bottom: 12px;
+            font-size: 0.875rem;
+            color: var(--light-text);
         }
 
         .selected-file {
@@ -327,6 +367,108 @@ HTML_TEMPLATE = """
             color: var(--light-text);
         }
 
+        .file-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--danger-color);
+            padding: 6px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .delete-btn:hover {
+            background-color: var(--danger-light);
+        }
+
+        .delete-icon {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            color: var(--text-color);
+        }
+
+        .modal-message {
+            margin-bottom: 24px;
+            color: var(--light-text);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .cancel-btn {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .cancel-btn:hover {
+            background-color: var(--border-color);
+        }
+
+        .confirm-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+        }
+
+        .confirm-btn:hover {
+            background-color: #C53030;
+        }
+
         .empty-list {
             padding: 24px;
             text-align: center;
@@ -348,7 +490,7 @@ HTML_TEMPLATE = """
     <header>
         <div class="logo">
             <span class="logo-icon"></span>
-            AI Chat
+            Knowledge Base
         </div>
         <div class="nav-links">
             <a href="/chat" class="nav-link">Chat</a>
@@ -394,6 +536,16 @@ HTML_TEMPLATE = """
                                     <div class="file-title">{{ file.name }}</div>
                                     <div class="file-meta">Uploaded {{ file.date }}</div>
                                 </div>
+                                <div class="file-actions">
+                                    <button type="button" class="delete-btn" onclick="showDeleteModal('{{ file.name }}')">
+                                        <svg class="delete-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         {% endfor %}
                     {% else %}
@@ -404,7 +556,42 @@ HTML_TEMPLATE = """
                 </div>
             </div>
         </div>
+
+        <div class="admin-container">
+            <h2>System Management</h2>
+            <p class="reset-description">Reset the vector store to rebuild indexes for all documents.</p>
+            <button type="button" class="reset-btn" onclick="showResetModal()">Reset Vector Store</button>
+        </div>
     </main>
+
+    <!-- Delete Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal">
+            <div class="modal-title">Delete Document</div>
+            <div class="modal-message">Are you sure you want to delete <span id="delete-file-name"></span>? This action cannot be undone.</div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+                <form action="/delete" method="post" id="delete-form">
+                    <input type="hidden" name="filename" id="delete-filename-input">
+                    <button type="submit" class="modal-btn confirm-btn">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Modal -->
+    <div class="modal-overlay" id="reset-modal">
+        <div class="modal">
+            <div class="modal-title">Reset Vector Store</div>
+            <div class="modal-message">Are you sure you want to reset the vector store? This will delete all indexed data and require reprocessing all documents.</div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn cancel-btn" onclick="closeResetModal()">Cancel</button>
+                <form action="/reset-vector-store" method="post">
+                    <button type="submit" class="modal-btn confirm-btn">Reset</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -427,6 +614,10 @@ HTML_TEMPLATE = """
         const removeFile = document.getElementById('remove-file');
         const uploadBtn = document.getElementById('upload-btn');
         const uploadArea = document.getElementById('upload-area');
+        const deleteModal = document.getElementById('delete-modal');
+        const resetModal = document.getElementById('reset-modal');
+        const deleteFileNameSpan = document.getElementById('delete-file-name');
+        const deleteFilenameInput = document.getElementById('delete-filename-input');
 
         // Handle file selection
         fileInput.addEventListener('change', function() {
@@ -492,6 +683,39 @@ HTML_TEMPLATE = """
             uploadBtn.textContent = 'Uploading...';
         });
         
+        // Delete Modal Functions
+        function showDeleteModal(filename) {
+            deleteFileNameSpan.textContent = filename;
+            deleteFilenameInput.value = filename;
+            deleteModal.classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            deleteModal.classList.remove('active');
+        }
+
+        // Reset Modal Functions
+        function showResetModal() {
+            resetModal.classList.add('active');
+        }
+
+        function closeResetModal() {
+            resetModal.classList.remove('active');
+        }
+
+        // Close modals when clicking outside
+        deleteModal.addEventListener('click', function(e) {
+            if (e.target === deleteModal) {
+                closeDeleteModal();
+            }
+        });
+
+        resetModal.addEventListener('click', function(e) {
+            if (e.target === resetModal) {
+                closeResetModal();
+            }
+        });
+        
         // Helper functions
         function resetFileInput() {
             fileInput.value = '';
@@ -523,6 +747,14 @@ HTML_TEMPLATE = """
             setTimeout(() => {
                 message.remove();
             }, 4000);
+        });
+
+        // Escape key to close modals
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDeleteModal();
+                closeResetModal();
+            }
         });
     </script>
 </body>
@@ -580,6 +812,43 @@ def upload_file():
         return redirect(url_for('home'))
     
     flash('Invalid file type. Only PDF files are allowed.', 'error')
+    return redirect(url_for('home'))
+
+@app.route('/delete', methods=['POST'])
+def delete_file():
+    filename = request.form.get('filename')
+    
+    if not filename:
+        flash('No file specified', 'error')
+        return redirect(url_for('home'))
+    
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    
+    # Check if file exists
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+            flash(f'File {filename} deleted successfully!', 'success')
+        except Exception as e:
+            flash(f'Error deleting file: {str(e)}', 'error')
+    else:
+        flash('File not found', 'error')
+    
+    return redirect(url_for('home'))
+
+@app.route('/reset-vector-store', methods=['POST'])
+def reset_vector_store():
+    # Check if vector store directory exists
+    if os.path.exists(VECTOR_STORE):
+        try:
+            # Delete the entire directory
+            shutil.rmtree(VECTOR_STORE)
+            flash('Vector store has been reset successfully!', 'success')
+        except Exception as e:
+            flash(f'Error resetting vector store: {str(e)}', 'error')
+    else:
+        flash('Vector store does not exist or has already been reset', 'success')
+    
     return redirect(url_for('home'))
 
 # Add route to access chat application
