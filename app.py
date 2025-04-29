@@ -480,7 +480,7 @@ def handle_chat():
     
     # Get response from model
     context = conversations[session_id].copy()
-    response = chat(message, context=context)
+    response = chat(message, context=context,max_new_tokens=500,rag=True)
     
     # Add assistant response to context
     conversations[session_id].append({"role": "assistant", "content": response})

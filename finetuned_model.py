@@ -3,11 +3,11 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel, PeftConfig
 import gc
-
+from rag import RAG
 # Global cache to avoid reloading the model
 model_cache = {}
 
-def chat(prompt, model_path="./qwen3-1.7b-finetuned-final", max_new_tokens=200, temperature=0.7, context=[]):
+def chat(prompt, model_path="./qwen3-1.7b-finetuned-final", max_new_tokens=200, temperature=0.7, context=[],rag=False):
     """
     Generate responses using your fine-tuned Qwen model.
     
@@ -78,13 +78,24 @@ def chat(prompt, model_path="./qwen3-1.7b-finetuned-final", max_new_tokens=200, 
     # Prepare conversation for Qwen format
     # Start with system message if not in context
     if not any(msg.get("role") == "system" for msg in context):
-        messages = [{"role": "system", "content": "You are a helpful assistant."}]
+        messages = [{"role": "system", "content": "You are a helpful assistant. You are smart, analytical, and great at communicating."}]
     else:
         messages = []
     
     # Add existing context
     messages.extend(context)
-    
+    #RAG
+    if rag:
+        information=RAG(prompt=prompt)
+        messages.append({"role": "system", "content": f"""
+                         Instructions:
+                         - You will use the information below to inform you response to the user prompt.
+                         - If information is not relevant to the prompt, ignore it.
+                         - Your response should be clear, cohesive, and coherent.
+
+                         Information
+                         ```{information}```
+                        """})
     # Add current prompt
     messages.append({"role": "user", "content": prompt})
     
