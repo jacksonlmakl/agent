@@ -3,6 +3,7 @@ from questions import question
 import threading
 import time
 import uuid  # For generating unique IDs
+import json
 
 class Model:
     def __init__(self):        
@@ -12,11 +13,36 @@ class Model:
         self.active_threads = {}  # Dictionary to track active threads with IDs
         self.lock = threading.Lock()  # Add a lock for thread safety
         self.thread_cleanup_interval = 60  # Seconds between thread cleanup
+        self.files=[]
 
         # Start thread monitoring
         self.monitor_thread = threading.Thread(target=self._monitor_threads, daemon=True)
         self.monitor_thread.start()
 
+        self.flush_thread = threading.Thread(target=self._flush, daemon=True)
+        self.flush_thread.start()
+
+    def _flush(self):
+        while True:
+            if len(self.conscious)>=10:
+                _temp=self.conscious
+                self.conscious=self.conscious[-5:]
+
+                file_path=f"""chats/chat_{str(uuid.uuid4())}__{str(time.time()).replace('.','')}.json"""
+                # Save the string to a JSON file
+                with open(file_path, 'w') as f:
+                    json.dump(_temp,f)
+                self.files.append(file_path)
+            if len(self.subconscious)>=1:
+                _temp=self.subconscious[0]
+                self.subconscious=[]
+                file_path=f"""chats/auto_chat_{str(uuid.uuid4())}__{str(time.time()).replace('.','')}.json"""
+                # Save the string to a JSON file
+                with open(file_path, 'w') as f:
+                    json.dump(_temp,f)
+                self.files.append(file_path)
+            
+        return 0
     def _monitor_threads(self):
         """Background thread that periodically cleans up completed threads"""
         while True:
@@ -33,7 +59,7 @@ class Model:
                                   rag=rag,
                                   tokens=tokens,
                                   use_gpt=use_gpt,
-                                  messages=self.conscious[-5:])
+                                  messages=self.conscious)
 
         generated_questions = question(response)
         
