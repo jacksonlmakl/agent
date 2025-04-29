@@ -28,3 +28,6 @@ PyPDF2
 openpyxl
 blobfile
 ipywidgets
+fsspec
+huggingface_hub
+datasets

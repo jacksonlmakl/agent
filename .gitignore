@@ -5,3 +5,6 @@ vector_store
 file_registry.json
 .DS_Store
 chats/*.json
+qwen3-1.7b-finetuned
+qwen3-1.7b-finetuned-final
+Development.ipynb
