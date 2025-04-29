@@ -1,14 +1,19 @@
 from flask import Flask, request, jsonify, render_template_string
 from model import Model
 import uuid
+import time
+import threading
+
+# Initialize the model outside of routes to ensure it persists between requests
+global MODEL
+MODEL = Model()
+
+def chat(prompt):
+    # We want to get a response immediately without waiting for background processing
+    r = MODEL.chat(prompt, web=False, rag=True, tokens=300, use_gpt=False, use_sub_gpt=True, iters=3)
+    return r
 
 app = Flask(__name__)
-global MODEL
-MODEL=Model()
-def chat(prompt,context=[]):
-    MODEL.chat(prompt,web=False,rag=True,tokens=300,use_gpt=True,use_sub_gpt=True,iters=3)
-    return MODEL.conscious[-1]['content']
-
 
 # Store conversation history
 conversations = {}
@@ -484,14 +489,39 @@ def handle_chat():
     if message:
         conversations[session_id].append({"role": "user", "content": message})
     
-    # Get response from model
-    context = conversations[session_id].copy()
-    response = chat(message, context=[])
+    # Get response from model - this will start background processing but return immediately
+    response = chat(message)
     
     # Add assistant response to context
     conversations[session_id].append({"role": "assistant", "content": response})
     
+    # Return the response to the client without waiting for background tasks
     return jsonify({"response": response})
+
+# Clean up old conversations periodically
+def cleanup_old_conversations():
+    while True:
+        try:
+            time.sleep(3600)  # Check once per hour
+            current_time = time.time()
+            # Keep only conversations from the last 24 hours
+            cutoff_time = current_time - (24 * 3600)
+            
+            # We need to find a way to determine when a conversation was last active
+            # For now, we'll just limit the total number of conversations
+            if len(conversations) > 100:
+                # Remove oldest 20 conversations - assumes keys (session_ids) are chronological
+                keys_to_remove = sorted(conversations.keys())[:20]
+                for key in keys_to_remove:
+                    if key in conversations:
+                        del conversations[key]
+                        
+        except Exception as e:
+            print(f"Error in cleanup thread: {e}")
+
+# Start the cleanup thread
+cleanup_thread = threading.Thread(target=cleanup_old_conversations, daemon=True)
+cleanup_thread.start()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)
