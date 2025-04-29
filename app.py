@@ -15,108 +15,332 @@ HTML_TEMPLATE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat</title>
+    <!-- Include Marked.js for Markdown rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary-color: #5436DA;
+            --primary-light: #EBE9F7;
+            --secondary-color: #10A37F;
+            --text-color: #343541;
+            --light-text: #6E6E80;
+            --border-color: #E5E5E5;
+            --bg-color: #F7F7F8;
+            --message-user-bg: #EBE9F7;
+            --message-bot-bg: #FFFFFF;
+            --shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background-color: #f0f2f5;
+            overflow: hidden;
         }
+        
         header {
-            background-color: #4a76a8;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-color: #FFFFFF;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            z-index: 10;
         }
-        h1 {
-            margin: 0;
-            font-size: 1.5rem;
+        
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
         }
-        .container {
+        
+        .logo-icon {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background-color: var(--primary-color);
+            border-radius: 8px;
+            margin-right: 8px;
+            position: relative;
+        }
+        
+        .logo-icon::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            background-color: white;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E") no-repeat center center;
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E") no-repeat center center;
+        }
+        
+        main {
             flex: 1;
             display: flex;
             flex-direction: column;
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 900px;
             width: 100%;
-            padding: 1rem;
-            box-sizing: border-box;
+            margin: 0 auto;
+            padding: 0;
+            overflow: hidden;
         }
+        
         .chat-container {
             flex: 1;
             overflow-y: auto;
-            padding: 1rem;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
+            padding: 24px 12px;
+            scroll-behavior: smooth;
         }
-        .message {
-            margin-bottom: 1rem;
-            padding: 0.8rem;
-            border-radius: 8px;
-            max-width: 80%;
-        }
-        .user-message {
-            background-color: #e3f2fd;
-            margin-left: auto;
-            border-bottom-right-radius: 0;
-        }
-        .bot-message {
-            background-color: #f1f1f1;
-            margin-right: auto;
-            border-bottom-left-radius: 0;
-            white-space: pre-wrap;
-        }
-        .input-container {
+        
+        .message-wrapper {
             display: flex;
-            gap: 0.5rem;
+            flex-direction: column;
+            margin-bottom: 24px;
+            max-width: 100%;
         }
+        
+        .message {
+            padding: 16px 20px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 1rem;
+            max-width: 90%;
+            overflow-wrap: break-word;
+        }
+        
+        .message pre {
+            white-space: pre-wrap;
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            padding: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .message code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.875rem;
+            background-color: rgba(0,0,0,0.05);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        .message pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        
+        .message p {
+            margin-bottom: 10px;
+        }
+        
+        .message p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .message ul, .message ol {
+            margin: 10px 0;
+            padding-left: 24px;
+        }
+        
+        .message h1, .message h2, .message h3, .message h4 {
+            margin: 16px 0 8px;
+        }
+        
+        .user-message-wrapper {
+            align-items: flex-end;
+            margin-left: auto;
+        }
+        
+        .bot-message-wrapper {
+            align-items: flex-start;
+        }
+        
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .user-avatar {
+            background-color: var(--primary-color);
+        }
+        
+        .bot-avatar {
+            background-color: var(--secondary-color);
+        }
+        
+        .user-message {
+            background-color: var(--message-user-bg);
+            color: var(--text-color);
+            border-bottom-right-radius: 4px;
+        }
+        
+        .bot-message {
+            background-color: var(--message-bot-bg);
+            color: var(--text-color);
+            border-bottom-left-radius: 4px;
+            box-shadow: var(--shadow);
+        }
+        
+        .input-container {
+            background-color: white;
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        
+        .input-box {
+            display: flex;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
         #user-input {
             flex: 1;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            padding: 14px;
+            border: none;
+            outline: none;
             font-size: 1rem;
+            resize: none;
+            max-height: 200px;
+            min-height: 48px;
+            line-height: 1.5;
+            background-color: white;
         }
-        button {
-            padding: 0.8rem 1.5rem;
-            background-color: #4a76a8;
+        
+        #send-button {
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 8px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-size: 1rem;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
         }
-        button:hover {
-            background-color: #3d6293;
+        
+        #send-button:hover {
+            background-color: #4630b8;
         }
+        
+        #send-button:disabled {
+            background-color: #a9a6c9;
+            cursor: not-allowed;
+        }
+        
+        .send-icon {
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='22' y1='2' x2='11' y2='13'%3E%3C/line%3E%3Cpolygon points='22 2 15 22 11 13 2 9 22 2'%3E%3C/polygon%3E%3C/svg%3E") no-repeat center center;
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='22' y1='2' x2='11' y2='13'%3E%3C/line%3E%3Cpolygon points='22 2 15 22 11 13 2 9 22 2'%3E%3C/polygon%3E%3C/svg%3E") no-repeat center center;
+        }
+        
         .typing-indicator {
             display: none;
-            margin-bottom: 1rem;
-            font-style: italic;
-            color: #666;
+            padding: 12px;
+            color: var(--light-text);
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .typing-animation {
+            display: inline-flex;
+            margin-left: 8px;
+        }
+        
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--light-text);
+            margin: 0 2px;
+            animation: typing-bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @keyframes typing-bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .message {
+                max-width: 95%;
+            }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Chat</h1>
+        <div class="logo">
+            <span class="logo-icon"></span>
+            Chat
+        </div>
     </header>
-    <div class="container">
+    <main>
         <div class="chat-container" id="chat-container">
             <!-- Messages will be dynamically added here -->
         </div>
-        <div class="typing-indicator" id="typing-indicator">Model is typing...</div>
-        <div class="input-container">
-            <input type="text" id="user-input" placeholder="Type a message..." autofocus>
-            <button id="send-button">Send</button>
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="message-avatar bot-avatar">AI</div>
+            &nbsp; Thinking
+            <div class="typing-animation">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
         </div>
-    </div>
+        <div class="input-container">
+            <div class="input-box">
+                <textarea id="user-input" placeholder="Message..." rows="1" autofocus></textarea>
+                <button id="send-button" disabled>
+                    <span class="send-icon"></span>
+                </button>
+            </div>
+        </div>
+    </main>
 
     <script>
         // Create a unique session ID
@@ -127,29 +351,64 @@ HTML_TEMPLATE = """
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
         const typingIndicator = document.getElementById('typing-indicator');
-
+        
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            // Reset height to auto to get the right scrollHeight
+            this.style.height = 'auto';
+            // Set new height
+            const newHeight = Math.min(this.scrollHeight, 200);
+            this.style.height = newHeight + 'px';
+            
+            // Enable/disable send button based on input
+            sendButton.disabled = this.value.trim() === '';
+        });
+        
         // Function to add a message to the chat
         function addMessage(content, isUser) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('message-wrapper');
+            messageWrapper.classList.add(isUser ? 'user-message-wrapper' : 'bot-message-wrapper');
+            
+            const avatar = document.createElement('div');
+            avatar.classList.add('message-avatar');
+            avatar.classList.add(isUser ? 'user-avatar' : 'bot-avatar');
+            avatar.textContent = isUser ? 'U' : 'AI';
+            messageWrapper.appendChild(avatar);
+            
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
             messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
-            messageDiv.textContent = content;
-            chatContainer.appendChild(messageDiv);
+            
+            if (isUser) {
+                messageDiv.textContent = content;
+            } else {
+                // Use marked.js to render markdown for bot messages
+                messageDiv.innerHTML = marked.parse(content);
+            }
+            
+            messageWrapper.appendChild(messageDiv);
+            chatContainer.appendChild(messageWrapper);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
-
+        
         // Function to send a message
         async function sendMessage() {
             const message = userInput.value.trim();
             if (!message) return;
-
+            
             // Display user message
             addMessage(message, true);
+            
+            // Clear input and reset height
             userInput.value = '';
-
+            userInput.style.height = 'auto';
+            sendButton.disabled = true;
+            
             // Show typing indicator
-            typingIndicator.style.display = 'block';
-
+            typingIndicator.style.display = 'flex';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
             try {
                 // Send message to backend
                 const response = await fetch('/chat', {
@@ -162,13 +421,13 @@ HTML_TEMPLATE = """
                         session_id: sessionId
                     }),
                 });
-
+                
                 const data = await response.json();
                 
                 // Hide typing indicator
                 typingIndicator.style.display = 'none';
                 
-                // Display bot response
+                // Display bot response with markdown rendering
                 addMessage(data.response, false);
             } catch (error) {
                 console.error('Error:', error);
@@ -176,13 +435,24 @@ HTML_TEMPLATE = """
                 addMessage('An error occurred. Please try again.', false);
             }
         }
-
+        
         // Event listeners
         sendButton.addEventListener('click', sendMessage);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+        userInput.addEventListener('keydown', (e) => {
+            // Send on Enter (without Shift key)
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendButton.disabled) {
+                    sendMessage();
+                }
+            }
         });
-
+        
+        // Focus input on page load
+        window.addEventListener('load', () => {
+            userInput.focus();
+        });
+        
         // Welcome message
         addMessage('Hello! How can I help you today?', false);
     </script>
